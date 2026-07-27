@@ -609,7 +609,18 @@ class announcements:
                 ctk.CTkLabel(self.inner_ui, text=str(i[2])).grid(row=k+1, column=3)
                 ctk.CTkLabel(self.inner_ui, text=str(i[3])).grid(row=k+1, column=4)
                 ctk.CTkLabel(self.inner_ui, text=str(i[4])).grid(row=k+1, column=0)
-        if self.session.role=="Teacher" or "Admin":
+        if self.session.role=="Teacher":
+           ctk.CTkLabel(self.inner_ui,text="Enter Title").grid(row=1,column=0)
+           self.ti = ctk.CTkEntry(self.inner_ui, placeholder_text="Enter title")
+           self.ti.grid(row=2, column=0,padx=5,pady=5)
+           ctk.CTkLabel(self.inner_ui,text="Enter Content").grid(row=3,column=0)
+           self.co = ctk.CTkEntry(self.inner_ui, placeholder_text="Enter Content")
+           self.co.grid(row=4, column=0,padx=5,pady=5)
+           ctk.CTkLabel(self.inner_ui,text="Enter Grades").grid(row=5,column=0)
+           self.ta_gr = ctk.CTkEntry(self.inner_ui, placeholder_text="Enter intended grades")
+           self.ta_gr.grid(row=6, column=0,padx=5,pady=5)
+           self.ta_gr.bind("<Return>", lambda e: self.new_annoncements())
+        if self.session.role=="Admin":
            ctk.CTkLabel(self.inner_ui,text="Enter Title").grid(row=1,column=0)
            self.ti = ctk.CTkEntry(self.inner_ui, placeholder_text="Enter title")
            self.ti.grid(row=2, column=0,padx=5,pady=5)
@@ -904,6 +915,12 @@ class admin_transport:
             ctk.CTkLabel(self.inner_ui, text=tpd[1],font=("Roboto", 18,"bold")).grid(row=8,column=2,padx=5,pady=5)
             ctk.CTkLabel(self.inner_ui, text=tpd[2],font=("Roboto", 18,"bold")).grid(row=9,column=2,padx=5,pady=5)
             ctk.CTkLabel(self.inner_ui, text=tpd[3],font=("Roboto", 18,"bold")).grid(row=10,column=2,padx=5,pady=5)
+            map_widget =TkinterMapView(self.inner_ui, width=300, height=300, corner_radius=10)
+            map_widget.grid(row=10,column=0,sticky="nsew",columnspan=2)
+            map_widget.set_position(12.847197675032593, 77.6302763426442)
+            marker_1=map_widget.set_marker(12.847197675032593, 77.6302763426442, text="DPS")
+            marker_2=map_widget.set_marker(12.82991380156151, 77.6652057838779, text="House")
+            map_widget.set_zoom(15)
             print(tpd)
         if tpd[0]=="Private":
             ctk.CTkLabel(self.inner_ui,text="Mode :",font=("Roboto", 18,"bold")).grid(row=7,column=0,padx=5,pady=5)
