@@ -7,6 +7,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 from PIL import Image
 from collections import defaultdict
 import os
+from tkintermapview import TkinterMapView
 data = defaultdict(dict)
 subjects = []
 class database:
@@ -20,37 +21,37 @@ class database:
         self.cur=self.con.cursor()
     def ver_log(self, user_id, password):
         self.cur.execute(
-            "SELECT * FROM user_details WHERE user_id = %s AND password = %s",
+            "select * from user_details WHERE user_id = %s AND password = %s",
             (user_id, password)
         )
         result = self.cur.fetchone()
         if result is None:
             return None
         # returns ("student",) or ("teacher",) or None  
-        self.cur.execute("SELECT grade from student_details where user_id=%s",(user_id,))
+        self.cur.execute("select grade from student_details where user_id=%s",(user_id,))
         resul=self.cur.fetchone() 
         return result,resul
     def create_user(self, user_id, password, role):
         self.cur.execute(
-            "INSERT INTO user_details (user_id, password, role) VALUES (%s, %s, %s)",
+            "Insert into user_details (user_id, password, role) VALUES (%s, %s, %s)",
             (user_id, password, role)
         )
         self.con.commit()
     def change_password(self, user_id, new_password):
         self.cur.execute(
-            "UPDATE user_details SET password = %s WHERE user_id = %s",
+            "Update user_details SET password = %s WHERE user_id = %s",
             (new_password, user_id)
         )
         self.con.commit()
     def delete_user(self, user_id):
         self.cur.execute(
-            "DELETE FROM user_details WHERE user_id = %s",
+            "Delete from user_details WHERE user_id = %s",
             (user_id,)
         )
         self.con.commit()
     def create_student(self, user_id, enrollment_no, name, grade, section, combination_id):
         self.cur.execute(
-            """INSERT INTO student_details 
+            """Insert into student_details 
             (user_id, enrollment_no, name, grade, section, combination_id)
             VALUES (%s, %s, %s, %s, %s, %s)""",
             (user_id, enrollment_no, name, grade, section, combination_id)
@@ -58,7 +59,7 @@ class database:
         self.con.commit()
     def create_teacher(self, user_id, employee_code, name, grade, subject_id):
         self.cur.execute(
-            """INSERT INTO teacher_details 
+            """Insert into teacher_details 
             (user_id, employee_code, name, grade, subject_id)
             VALUES (%s, %s, %s, %s, %s)""",
             (user_id, employee_code, name, grade, subject_id)
@@ -66,26 +67,26 @@ class database:
         self.con.commit()
     def get_student_details(self, user_id):
         self.cur.execute(
-            "SELECT * FROM student_details WHERE user_id = %s",
+            "select * from student_details WHERE user_id = %s",
             (user_id,)
         )
         return self.cur.fetchone()
     def get_announcements(self,grade):
         self.cur.execute(
-            "SELECT * FROM announcements WHERE target_grade LIKE %s OR target_grade = 'all'",
+            "select * from announcements WHERE target_grade LIKE %s OR target_grade = 'all'",
             (f'%{grade}%',)
         )
         announce_result= self.cur.fetchall()
         return announce_result
     def new_announcements(self,titl,cont,ta_gra):
-        self.cur.execute("INSERT INTO announcements (title, content, target_grade) VALUES (%s, %s, %s)", (titl, cont, ta_gra))#insertion
+        self.cur.execute("Insert into announcements (title, content, target_grade) VALUES (%s, %s, %s)", (titl, cont, ta_gra))#insertion
         self.con.commit()#con is needed/the connector
         messagebox.showinfo("Process","The announcement has been posted")
     def report_card_details(self,user_id):
         self.cur.execute("""
-    SELECT s.subject_name, m.marks_obtained, m.term 
-    FROM marks m
-    JOIN subjects s ON m.subject_id = s.subject_id
+    select s.subject_name, m.marks_obtained, m.term 
+    from marks m
+    join subjects s ON m.subject_id = s.subject_id
     WHERE m.user_id = %s
     ORDER BY m.term, s.subject_name
 """, (user_id,))#s. and m. are table aliases /shorthand so we don't have to retype the table name every time, also this approach was used for a better presentable output the simpler query gives a hvery very lenghty output
@@ -97,96 +98,94 @@ class database:
         return announce_card
     def insert_mark(self, user_id, subject_id, term, marks_obtained, max_marks, grade):
         self.cur.execute(
-            """INSERT INTO marks (user_id, subject_id, term, marks_obtained, max_marks, grade)
+            """Insert into marks (user_id, subject_id, term, marks_obtained, max_marks, grade)
             VALUES (%s, %s, %s, %s, %s, %s)
-            ON DUPLICATE KEY UPDATE marks_obtained = %s""",
+            ON DUPLICATE KEY Update marks_obtained = %s""",
             (user_id, subject_id, term, marks_obtained, max_marks, grade, marks_obtained)
         )
         self.con.commit()
     def get_subjects_by_combination(self, combination_id):
         self.cur.execute(
-            """SELECT s.subject_id, s.subject_name 
-            FROM subjects s
-            JOIN subject_combinations sc ON s.subject_id = sc.subject_id
+            """select s.subject_id, s.subject_name 
+            from subjects s
+            join subject_combinations sc ON s.subject_id = sc.subject_id
             WHERE sc.combination_id = %s""",
             (combination_id,)
         )
         return self.cur.fetchall()
     def get_grades(self): # the functions below are made to assist with dropdowns
-        self.cur.execute(
-            "SELECT DISTINCT grade FROM student_details ORDER BY grade"
-        )
+        self.cur.execute("SELECT DISTINCT grade FROM student_details ORDER BY FIELD(grade,'I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII')")
         return [row[0] for row in self.cur.fetchall()]
     def get_sections_by_grade(self, grade):
         self.cur.execute(
-            "SELECT DISTINCT section FROM student_details WHERE grade = %s ORDER BY section",
+            "select DISTINCT section from student_details WHERE grade = %s ORDER BY section",
             (grade,)
         )
         return [row[0] for row in self.cur.fetchall()]
     def get_students_by_grade_section(self, grade, section):
         self.cur.execute(
-            """SELECT user_id, name FROM student_details 
+            """select user_id, name from student_details 
             WHERE grade = %s AND section = %s ORDER BY name""",
             (grade, section)
         )
         return self.cur.fetchall()  # returns [(user_id, name), ...]
     def get_teacher_grades(self, user_id):
         self.cur.execute(
-            "SELECT grade FROM teacher_details WHERE user_id = %s",
+            "select grade from teacher_details WHERE user_id = %s",
             (user_id,)
         )
         result = self.cur.fetchone()[0]  # gives 'IX,X'
         return result.split(',')        # gives ['IX', 'X']
     def get_report_card(self, user_id):
         self.cur.execute("""
-            SELECT s.subject_name, m.marks_obtained, m.term
-            FROM marks m
-            JOIN subjects s ON m.subject_id = s.subject_id
+            select s.subject_name, m.marks_obtained, m.term
+            from marks m
+            join subjects s ON m.subject_id = s.subject_id
             WHERE m.user_id = %s
             ORDER BY m.term, s.subject_name
         """, (user_id,))
         return self.cur.fetchall()
     def get_subject_id_map(self):
-        self.cur.execute("SELECT subject_name, subject_id FROM subjects")
+        self.cur.execute("select subject_name, subject_id from subjects")
         return {name: sid for name, sid in self.cur.fetchall()}
 
     def get_student_grade(self, user_id):
         self.cur.execute(
-            "SELECT grade FROM student_details WHERE user_id = %s",
+            "select grade from student_details WHERE user_id = %s",
             (user_id,)
         )
         return self.cur.fetchone()[0]
     def transport_details(self,user_id):
         self.cur.execute("""
-        SELECT td.mode, br.route_name, br.driver_name, 
+        select td.mode, br.route_name, br.driver_name, 
                br.driver_contact, br.vehicle_number,
                td.guardian_name, td.guardian_contact
-        FROM transport_details td
-        LEFT JOIN bus_routes br ON td.route_id = br.route_id
+        from transport_details td
+        LEFT join bus_routes br ON td.route_id = br.route_id
         WHERE td.user_id = %s
     """, (user_id,))
         return self.cur.fetchone()
     def get_all_transport(self):
         self.cur.execute(
-            """SELECT sd.name, sd.grade, td.mode, 
+            """select sd.name, sd.grade, td.mode, 
                     br.route_name, br.driver_name, br.driver_contact,
                     td.guardian_name, td.guardian_contact
-            FROM transport_details td
-            JOIN student_details sd ON td.user_id = sd.user_id
-            LEFT JOIN bus_routes br ON td.route_id = br.route_id
+            from transport_details td
+            join student_details sd ON td.user_id = sd.user_id
+            LEFT join bus_routes br ON td.route_id = br.route_id
             ORDER BY td.mode, br.route_name, sd.name"""
         )
         return self.cur.fetchall()
     def add_b_route(self, route_name, driver_name, driver_contact, vehicle_number):
         self.cur.execute(
-            """INSERT INTO bus_routes (route_name, driver_name, driver_contact, vehicle_number)
+            """Insert into bus_routes (route_name, driver_name, driver_contact, vehicle_number)
             VALUES (%s, %s, %s, %s)""",
             (route_name, driver_name, driver_contact, vehicle_number)
         )
         self.con.commit()
     def update_stud_transp(self, user_id, mode, route_id=None, guardian_name=None, guardian_contact=None):
         self.cur.execute(
-            """UPDATE transport_details 
+            """Update transport_details 
             SET mode = %s, route_id = %s, 
                 guardian_name = %s, guardian_contact = %s
             WHERE user_id = %s""",
@@ -195,48 +194,48 @@ class database:
         self.con.commit()
     def fees_details(self,user_id):
         self.cur.execute("""
-        SELECT f.term1_fee, f.term2_fee,
+        select f.term1_fee, f.term2_fee,
                f.term1_status, f.term2_status,
                f.term1_paid_date, f.term2_paid_date
-        FROM fees f
+        from fees f
         WHERE f.user_id = %s
     """, (user_id,))
         return self.cur.fetchone()
     def get_newsletters(self):
         self.cur.execute("""
-            SELECT newsletter_id, month, title, published_date, file_path
-            FROM newsletter
+            select newsletter_id, month, title, published_date, file_path
+            from newsletter
             ORDER BY published_date DESC
         """)
         news_result=self.cur.fetchall()
         return news_result
     def add_newsletter(self, month, title, file_path, published_date):
         self.cur.execute(
-            """INSERT INTO newsletter (month, title, file_path, published_date)
+            """Insert into newsletter (month, title, file_path, published_date)
             VALUES (%s, %s, %s, %s)""",
             (month, title, file_path, published_date)
         )
         self.con.commit()
     def canteen(self, day):
         self.cur.execute("""
-            SELECT cd.meal, cm.item_name, cm.price
-            FROM canteen_daily cd
-            JOIN canteen_menu cm ON cd.item_id = cm.item_id
+            select cd.meal, cm.item_name, cm.price
+            from canteen_daily cd
+            join canteen_menu cm ON cd.item_id = cm.item_id
             WHERE cd.day = %s
             ORDER BY cd.meal
         """, (day,))
         return self.cur.fetchall()
     def get_all_menu_items(self):
         self.cur.execute("""
-            SELECT item_id, item_name, price, category 
-            FROM canteen_menu 
+            select item_id, item_name, price, category 
+            from canteen_menu 
             ORDER BY category, item_name
         """)
         return self.cur.fetchall()
 
     def add_menu_item(self, item_name, price, category):
         self.cur.execute("""
-            INSERT INTO canteen_menu (item_name, price, category)
+            Insert into canteen_menu (item_name, price, category)
             VALUES (%s, %s, %s)
         """, (item_name, price, category))
         self.con.commit()
@@ -244,7 +243,7 @@ class database:
 
     def update_item_price(self, item_id, new_price):
         self.cur.execute("""
-            UPDATE canteen_menu SET price = %s 
+            Update canteen_menu SET price = %s 
             WHERE item_id = %s
         """, (new_price, item_id))
         self.con.commit()
@@ -252,14 +251,14 @@ class database:
 
     def delete_menu_item(self, item_id):
         self.cur.execute(
-            "DELETE FROM canteen_menu WHERE item_id = %s",
+            "Delete from canteen_menu WHERE item_id = %s",
             (item_id,)
         )
         self.con.commit()
         messagebox.showinfo("Success", "Item removed successfully")
     def get_subject_name(self, subject_id):
         self.cur.execute(
-            "SELECT subject_name FROM subjects WHERE subject_id = %s",
+            "select subject_name from subjects WHERE subject_id = %s",
             (subject_id,)
         )
         return self.cur.fetchone()[0]
@@ -268,40 +267,40 @@ class database:
         # grades 1-10 all have combination 1
         if grade in ('XI', 'XII'):
             self.cur.execute("""
-                SELECT DISTINCT s.subject_id, s.subject_name 
-                FROM subjects s
-                JOIN subject_combinations sc ON s.subject_id = sc.subject_id
+                select DISTINCT s.subject_id, s.subject_name 
+                from subjects s
+                join subject_combinations sc ON s.subject_id = sc.subject_id
                 WHERE sc.combination_id IN (2,3,4,5)
                 ORDER BY s.subject_name
             """)
         else:
             self.cur.execute("""
-                SELECT s.subject_id, s.subject_name 
-                FROM subjects s
-                JOIN subject_combinations sc ON s.subject_id = sc.subject_id
+                select s.subject_id, s.subject_name 
+                from subjects s
+                join subject_combinations sc ON s.subject_id = sc.subject_id
                 WHERE sc.combination_id = 1
                 ORDER BY s.subject_name
             """)
         return self.cur.fetchall()
     def get_hw(self, grade):
         self.cur.execute("""
-            SELECT h.title, s.subject_name, h.content, h.posted_date
-            FROM homework h
-            JOIN subjects s ON h.subject_id = s.subject_id
+            select h.title, s.subject_name, h.content, h.posted_date
+            from homework h
+            join subjects s ON h.subject_id = s.subject_id
             WHERE h.grade = %s
             ORDER BY h.posted_date DESC
         """, (grade,))
         return self.cur.fetchall()
     def post_hw(self, subject_id, title, content, grade):
         self.cur.execute("""
-            INSERT INTO homework (subject_id, title, content, grade)
+            Insert into homework (subject_id, title, content, grade)
             VALUES (%s, %s, %s, %s)
         """, (subject_id, title, content, grade))
         self.con.commit()
         messagebox.showinfo("Success", "Homework posted successfully")
     def get_teacher_subject(self, user_id):
         self.cur.execute(
-            "SELECT subject_id FROM teacher_details WHERE user_id = %s",
+            "select subject_id from teacher_details WHERE user_id = %s",
             (user_id,)
         )
         result = self.cur.fetchone()
@@ -437,11 +436,10 @@ class fees:
         ctk.CTkLabel(self.inner_ui,text=q[2],font=("Roboto", 18)).grid(row=3,column=1,pady=5,padx=5)
         ctk.CTkLabel(self.inner_ui,text=q[3],font=("Roboto", 18)).grid(row=4,column=1,pady=5,padx=5)
         ctk.CTkLabel(self.inner_ui,text=q[4],font=("Roboto", 18)).grid(row=5,column=1,pady=5,padx=5)
-        ctk.CTkLabel(self.inner_ui,text="User ID :",font=("Roboto", 18,"bold")).grid(row=1,column=0,padx=5,pady=5)
-        ctk.CTkLabel(self.inner_ui,text="Enrollment number :",font=("Roboto", 18,"bold")).grid(row=2,column=0,padx=5,pady=5)
-        ctk.CTkLabel(self.inner_ui,text="Name :",font=("Roboto", 18,"bold")).grid(row=3,column=0,padx=5,pady=5)
-        ctk.CTkLabel(self.inner_ui,text="Class :",font=("Roboto", 18,"bold")).grid(row=4,column=0,padx=5,pady=5)
-        ctk.CTkLabel(self.inner_ui,text="Section :",font=("Roboto", 18,"bold")).grid(row=5,column=0,padx=5,pady=5)
+        ctk.CTkLabel(self.inner_ui,text="Enrollment number :",font=("Roboto", 18,"bold")).grid(row=1,column=0,padx=5,pady=5)
+        ctk.CTkLabel(self.inner_ui,text="Name :",font=("Roboto", 18,"bold")).grid(row=2,column=0,padx=5,pady=5)
+        ctk.CTkLabel(self.inner_ui,text="Class :",font=("Roboto", 18,"bold")).grid(row=3,column=0,padx=5,pady=5)
+        ctk.CTkLabel(self.inner_ui,text="Section :",font=("Roboto", 18,"bold")).grid(row=4,column=0,padx=5,pady=5)
         f = self.db.fees_details(self.session.user_id)
         # TO UNPACK cleanly
         term1_fee, term2_fee, term1_status, term2_status, term1_date, term2_date = f
@@ -620,7 +618,7 @@ class announcements:
            self.ta_gr = ctk.CTkEntry(self.inner_ui, placeholder_text="Enter intended grades")
            self.ta_gr.grid(row=6, column=0,padx=5,pady=5)
            self.ta_gr.bind("<Return>", lambda e: self.new_annoncements())
-        if self.session.role=="Admin":
+        if self.session.role=="Admin": #SPLIT into two cause there was an error on the studnet side when or was being used.
            ctk.CTkLabel(self.inner_ui,text="Enter Title").grid(row=1,column=0)
            self.ti = ctk.CTkEntry(self.inner_ui, placeholder_text="Enter title")
            self.ti.grid(row=2, column=0,padx=5,pady=5)
@@ -734,7 +732,7 @@ class transportdetails:
         self.session=session
         self.db=db
         self.root.title("We Better")
-        self.root.geometry("360x540")
+        self.root.geometry("540x540")
         self.scroll=ctk.CTkScrollableFrame(root)
         self.scroll.pack(fill="both", expand=True, padx=10, pady=10)
         self.inner_ui=ctk.CTkFrame(self.scroll)
@@ -762,7 +760,12 @@ class transportdetails:
             ctk.CTkLabel(self.inner_ui, text=tpd[1],font=("Roboto", 18,"bold")).grid(row=7,column=1,padx=5,pady=5)
             ctk.CTkLabel(self.inner_ui, text=tpd[2],font=("Roboto", 18,"bold")).grid(row=8,column=1,padx=5,pady=5)
             ctk.CTkLabel(self.inner_ui, text=tpd[3],font=("Roboto", 18,"bold")).grid(row=9,column=1,padx=5,pady=5)
-            print(tpd)
+            map_widget =TkinterMapView(self.inner_ui, width=300, height=300, corner_radius=10)
+            map_widget.grid(row=10,column=0,sticky="nsew",columnspan=2)
+            map_widget.set_position(12.847197675032593, 77.6302763426442)
+            marker_1=map_widget.set_marker(12.847197675032593, 77.6302763426442, text="DPS")
+            marker_2=map_widget.set_marker(12.82991380156151, 77.6652057838779, text="House")
+            map_widget.set_zoom(10)
         if tpd[0]=="Private":
             ctk.CTkLabel(self.inner_ui,text="Mode :",font=("Roboto", 18,"bold")).grid(row=6,column=0,padx=5,pady=5)
             ctk.CTkLabel(self.inner_ui, text="Guardian :",font=("Roboto", 18,"bold")).grid(row=7,column=0,padx=5,pady=5)
@@ -921,7 +924,6 @@ class admin_transport:
             marker_1=map_widget.set_marker(12.847197675032593, 77.6302763426442, text="DPS")
             marker_2=map_widget.set_marker(12.82991380156151, 77.6652057838779, text="House")
             map_widget.set_zoom(15)
-            print(tpd)
         if tpd[0]=="Private":
             ctk.CTkLabel(self.inner_ui,text="Mode :",font=("Roboto", 18,"bold")).grid(row=7,column=0,padx=5,pady=5)
             ctk.CTkLabel(self.inner_ui, text="Guardian :",font=("Roboto", 18,"bold")).grid(row=8,column=0,padx=5,pady=5)
@@ -1047,11 +1049,11 @@ class adminteach_hw:
             ctk.CTkLabel(self.inner_ui, text="Subject").grid(row=2, column=0, padx=10, pady=5)
             ctk.CTkLabel(self.inner_ui, text=subject_name, font=("Roboto", 13, "bold")).grid(row=2, column=1, padx=10, pady=5)
             ctk.CTkLabel(self.inner_ui, text="Title").grid(row=3, column=0, padx=10, pady=5)
-            self.title_entry = ctk.CTkEntry(self.inner_ui, width=200, placeholder_text="Enter title")
-            self.title_entry.grid(row=3, column=1, padx=10, pady=5)
+            self.titl_entry = ctk.CTkEntry(self.inner_ui, width=200, placeholder_text="Enter title")
+            self.titl_entry.grid(row=3, column=1, padx=10, pady=5)
             ctk.CTkLabel(self.inner_ui, text="Content").grid(row=4, column=0, padx=10, pady=5)
-            self.content_entry = ctk.CTkEntry(self.inner_ui, width=200, placeholder_text="Enter content")
-            self.content_entry.grid(row=4, column=1, padx=10, pady=5)
+            self.cont_entry = ctk.CTkEntry(self.inner_ui, width=200, placeholder_text="Enter content")
+            self.cont_entry.grid(row=4, column=1, padx=10, pady=5)
             ctk.CTkButton(
                 self.inner_ui, text="Post Homework",
                 command=self.post_homework_teacher
@@ -1071,11 +1073,11 @@ class adminteach_hw:
             self.subject_drop = ctk.CTkOptionMenu(self.inner_ui,values=["Select Grade First"],variable=self.subject_var,command=self.on_subject_select)
             self.subject_drop.grid(row=2, column=1, padx=10, pady=5)
             ctk.CTkLabel(self.inner_ui, text="Title").grid(row=3, column=0, padx=10, pady=5)
-            self.title_entry = ctk.CTkEntry(self.inner_ui, width=200, placeholder_text="Enter title")
-            self.title_entry.grid(row=3, column=1, padx=10, pady=5)
+            self.titl_entry = ctk.CTkEntry(self.inner_ui, width=200, placeholder_text="Enter title")
+            self.titl_entry.grid(row=3, column=1, padx=10, pady=5)
             ctk.CTkLabel(self.inner_ui, text="Content").grid(row=4, column=0, padx=10, pady=5)
-            self.content_entry = ctk.CTkEntry(self.inner_ui, width=200, placeholder_text="Enter content")
-            self.content_entry.grid(row=4, column=1, padx=10, pady=5)
+            self.cont_entry = ctk.CTkEntry(self.inner_ui, width=200, placeholder_text="Enter content")
+            self.cont_entry.grid(row=4, column=1, padx=10, pady=5)
             ctk.CTkButton(self.inner_ui, text="Post Homework",command=self.post_homework_admin).grid(row=5, column=0, columnspan=2, pady=10)
     def on_grade_select_admin(self, grade):
         subjects = self.db.get_subjects_for_grade(grade)
@@ -1090,19 +1092,19 @@ class adminteach_hw:
         pass  # grade just updates the var, subject stays fixed
     def post_homework_teacher(self):
         grade = self.grade_var.get()
-        title = self.title_entry.get().strip()
-        content = self.content_entry.get().strip()
+        title = self.titl_entry.get().strip()
+        content = self.cont_entry.get().strip()
         if not title or not content:
             messagebox.showerror("Error", "Please fill in all fields")
             return
         self.db.post_hw(self.session.subject_id, title, content, grade)
-        self.title_entry.delete(0, 'end')
-        self.content_entry.delete(0, 'end')
+        self.titl_entry.delete(0, 'end')
+        self.cont_entry.delete(0, 'end')
     def post_homework_admin(self):
         grade = self.grade_var.get()
         subject_name = self.subject_var.get()
-        title = self.title_entry.get().strip()
-        content = self.content_entry.get().strip()
+        title = self.titl_entry.get().strip()
+        content = self.cont_entry.get().strip()
         if grade == "Select Grade" or subject_name == "Select Grade First" or subject_name == "Select Subject":
             messagebox.showerror("Error", "Please select grade and subject")
             return
@@ -1111,8 +1113,8 @@ class adminteach_hw:
             return
         subject_id = self.subject_map[subject_name]
         self.db.post_hw(subject_id, title, content, grade)
-        self.title_entry.delete(0, 'end')
-        self.content_entry.delete(0, 'end')
+        self.titl_entry.delete(0, 'end')
+        self.cont_entry.delete(0, 'end')
     def back_bt(self):
          for widget in self.root.winfo_children():
             widget.destroy()
@@ -1235,4 +1237,5 @@ if __name__ == "__main__":
     root.mainloop()
     
     
+
 
