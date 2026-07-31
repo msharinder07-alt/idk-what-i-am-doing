@@ -20,17 +20,24 @@ class database:
         )
         self.cur=self.con.cursor()
     def ver_log(self, user_id, password):
-        self.cur.execute(
-            "select * from user_details WHERE user_id = %s AND password = %s",
-            (user_id, password)
-        )
-        result = self.cur.fetchone()
-        if result is None:
-            return None
-        # returns ("student",) or ("teacher",) or None  
-        self.cur.execute("select grade from student_details where user_id=%s",(user_id,))
-        resul=self.cur.fetchone() 
-        return result,resul
+        self.cur.execute("select password from user_details WHERE user_id = %s",(user_id))
+        res=self.cur.fetchone()
+        print(res)
+        if res[0]==password:
+            self.cur.execute(
+                "select * from user_details WHERE user_id = %s AND password = %s",
+                (user_id, password)
+            )
+            result = self.cur.fetchone()
+            print(result)
+            if result is None:
+                return None
+            # returns ("student",) or ("teacher",) or None  
+            self.cur.execute("select grade from student_details where user_id=%s",(user_id,))
+            resul=self.cur.fetchone() 
+            return result,resul
+        else:
+            messagebox.showerror("Error", "Invalid credentials.")
     def create_user(self, user_id, password, role):
         self.cur.execute(
             "Insert into user_details (user_id, password, role) VALUES (%s, %s, %s)",
@@ -359,14 +366,12 @@ class login:
             messagebox.showerror("Error", "Please fill in both fields.")
             return
         result = self.db.ver_log(user_id, password)
-        if result is None:
-            messagebox.showerror("Error", "Invalid credentials.")
-            return
-        role = result[0][2]
-        grade = result[1][0] if result[1] else None
-        # get teacher grades list if teacher
-        grades = None
-        subject_id = None
+        if result != None:
+            role = result[0][2]
+            grade = result[1][0] if result[1] else None
+            # get teacher grades list if teacher
+            grades = None
+            subject_id = None
         if role == 'Teacher':
             grades = self.db.get_teacher_grades(user_id)
             subject_id = self.db.get_teacher_subject(user_id)
