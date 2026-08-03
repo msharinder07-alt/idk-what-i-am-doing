@@ -20,41 +20,22 @@ class database:
         )
         self.cur=self.con.cursor()
     def ver_log(self, user_id, password):
-        self.cur.execute("select password from user_details WHERE user_id = %s",(user_id))
-        res=self.cur.fetchone()
-        print(res)
-        if res[0]==password:
-            self.cur.execute(
-                "select * from user_details WHERE user_id = %s AND password = %s",
-                (user_id, password)
-            )
-            result = self.cur.fetchone()
-            print(result)
-            if result is None:
-                return None
-            # returns ("student",) or ("teacher",) or None  
-            self.cur.execute("select grade from student_details where user_id=%s",(user_id,))
-            resul=self.cur.fetchone() 
-            return result,resul
-        else:
-            messagebox.showerror("Error", "Invalid credentials.")
+        self.cur.execute("select * from user_details WHERE user_id = %s AND password = %s",(user_id, password))
+        result = self.cur.fetchone()
+        if result is None:
+            return None
+        # returns ("student",) or ("teacher",) or None  
+        self.cur.execute("select grade from student_details where user_id=%s",(user_id,))
+        resul=self.cur.fetchone() 
+        return result,resul
     def create_user(self, user_id, password, role):
-        self.cur.execute(
-            "Insert into user_details (user_id, password, role) VALUES (%s, %s, %s)",
-            (user_id, password, role)
-        )
+        self.cur.execute("Insert into user_details (user_id, password, role) VALUES (%s, %s, %s)",(user_id, password, role))
         self.con.commit()
     def change_password(self, user_id, new_password):
-        self.cur.execute(
-            "Update user_details SET password = %s WHERE user_id = %s",
-            (new_password, user_id)
-        )
+        self.cur.execute("Update user_details SET password = %s WHERE user_id = %s",(new_password, user_id))
         self.con.commit()
     def delete_user(self, user_id):
-        self.cur.execute(
-            "Delete from user_details WHERE user_id = %s",
-            (user_id,)
-        )
+        self.cur.execute("Delete from user_details WHERE user_id = %s", (user_id,))
         self.con.commit()
     def create_student(self, user_id, enrollment_no, name, grade, section, combination_id):
         self.cur.execute(
@@ -73,16 +54,10 @@ class database:
         )
         self.con.commit()
     def get_student_details(self, user_id):
-        self.cur.execute(
-            "select * from student_details WHERE user_id = %s",
-            (user_id,)
-        )
+        self.cur.execute("select * from student_details WHERE user_id = %s",(user_id,))
         return self.cur.fetchone()
     def get_announcements(self,grade):
-        self.cur.execute(
-            "select * from announcements WHERE target_grade LIKE %s OR target_grade = 'all'",
-            (f'%{grade}%',)
-        )
+        self.cur.execute("select * from announcements WHERE target_grade LIKE %s OR target_grade = 'all'",(f'%{grade}%',))
         announce_result= self.cur.fetchall()
         return announce_result
     def new_announcements(self,titl,cont,ta_gra):
@@ -124,10 +99,7 @@ class database:
         self.cur.execute("SELECT DISTINCT grade FROM student_details ORDER BY FIELD(grade,'I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII')")
         return [row[0] for row in self.cur.fetchall()]
     def get_sections_by_grade(self, grade):
-        self.cur.execute(
-            "select DISTINCT section from student_details WHERE grade = %s ORDER BY section",
-            (grade,)
-        )
+        self.cur.execute("select DISTINCT section from student_details WHERE grade = %s ORDER BY section",(grade,))
         return [row[0] for row in self.cur.fetchall()]
     def get_students_by_grade_section(self, grade, section):
         self.cur.execute(
@@ -137,10 +109,7 @@ class database:
         )
         return self.cur.fetchall()  # returns [(user_id, name), ...]
     def get_teacher_grades(self, user_id):
-        self.cur.execute(
-            "select grade from teacher_details WHERE user_id = %s",
-            (user_id,)
-        )
+        self.cur.execute("select grade from teacher_details WHERE user_id = %s",(user_id,))
         result = self.cur.fetchone()[0]  # gives 'IX,X'
         return result.split(',')        # gives ['IX', 'X']
     def get_report_card(self, user_id):
@@ -155,12 +124,8 @@ class database:
     def get_subject_id_map(self):
         self.cur.execute("select subject_name, subject_id from subjects")
         return {name: sid for name, sid in self.cur.fetchall()}
-
     def get_student_grade(self, user_id):
-        self.cur.execute(
-            "select grade from student_details WHERE user_id = %s",
-            (user_id,)
-        )
+        self.cur.execute("select grade from student_details WHERE user_id = %s",(user_id,))
         return self.cur.fetchone()[0]
     def transport_details(self,user_id):
         self.cur.execute("""
@@ -183,14 +148,14 @@ class database:
             ORDER BY td.mode, br.route_name, sd.name"""
         )
         return self.cur.fetchall()
-    def add_b_route(self, route_name, driver_name, driver_contact, vehicle_number):
+    def add_b_route(self, route_name, driver_name, driver_contact, vehicle_number): #UNUSED ATM, we still have to make this
         self.cur.execute(
             """Insert into bus_routes (route_name, driver_name, driver_contact, vehicle_number)
             VALUES (%s, %s, %s, %s)""",
             (route_name, driver_name, driver_contact, vehicle_number)
         )
         self.con.commit()
-    def update_stud_transp(self, user_id, mode, route_id=None, guardian_name=None, guardian_contact=None):
+    def update_stud_transp(self, user_id, mode, route_id=None, guardian_name=None, guardian_contact=None):#AND this too
         self.cur.execute(
             """Update transport_details 
             SET mode = %s, route_id = %s, 
@@ -239,7 +204,6 @@ class database:
             ORDER BY category, item_name
         """)
         return self.cur.fetchall()
-
     def add_menu_item(self, item_name, price, category):
         self.cur.execute("""
             Insert into canteen_menu (item_name, price, category)
@@ -247,7 +211,6 @@ class database:
         """, (item_name, price, category))
         self.con.commit()
         messagebox.showinfo("Success", "Item added successfully")
-
     def update_item_price(self, item_id, new_price):
         self.cur.execute("""
             Update canteen_menu SET price = %s 
@@ -255,23 +218,16 @@ class database:
         """, (new_price, item_id))
         self.con.commit()
         messagebox.showinfo("Success", "Price updated successfully")
-
     def delete_menu_item(self, item_id):
-        self.cur.execute(
-            "Delete from canteen_menu WHERE item_id = %s",
-            (item_id,)
-        )
+        self.cur.execute("Delete from canteen_menu WHERE item_id = %s",(item_id,))
         self.con.commit()
         messagebox.showinfo("Success", "Item removed successfully")
     def get_subject_name(self, subject_id):
-        self.cur.execute(
-            "select subject_name from subjects WHERE subject_id = %s",
-            (subject_id,)
-        )
+        self.cur.execute("select subject_name from subjects WHERE subject_id = %s",(subject_id,))
         return self.cur.fetchone()[0]
     def get_subjects_for_grade(self, grade):
-        # grades 11 and 12 have multiple combinations so get all unique subjects
-        # grades 1-10 all have combination 1
+        # grades 11 and 12 have multiple combos so get all unique subjects
+        # grades 1-10 have only 1
         if grade in ('XI', 'XII'):
             self.cur.execute("""
                 select DISTINCT s.subject_id, s.subject_name 
@@ -306,10 +262,7 @@ class database:
         self.con.commit()
         messagebox.showinfo("Success", "Homework posted successfully")
     def get_teacher_subject(self, user_id):
-        self.cur.execute(
-            "select subject_id from teacher_details WHERE user_id = %s",
-            (user_id,)
-        )
+        self.cur.execute("select subject_id from teacher_details WHERE user_id = %s",(user_id,))
         result = self.cur.fetchone()
         return result[0] if result else None
 #session exists so that we know the user and their role from the very beginning, so that we don't have to call a query every time we need info
@@ -366,12 +319,14 @@ class login:
             messagebox.showerror("Error", "Please fill in both fields.")
             return
         result = self.db.ver_log(user_id, password)
-        if result != None:
-            role = result[0][2]
-            grade = result[1][0] if result[1] else None
-            # get teacher grades list if teacher
-            grades = None
-            subject_id = None
+        if result is None:
+            messagebox.showerror("Error", "Invalid credentials.")
+            return
+        role = result[0][2]
+        grade = result[1][0] if result[1] else None
+        # get teacher grades list if teacher
+        grades = None
+        subject_id = None
         if role == 'Teacher':
             grades = self.db.get_teacher_grades(user_id)
             subject_id = self.db.get_teacher_subject(user_id)
@@ -385,40 +340,45 @@ class mainmenu:
         self.db=db
         self.session=session
         self.root.title("SMS")
-        self.root.geometry("380x540")
-        self.scroll=ctk.CTkScrollableFrame(root)
-        self.scroll.pack(fill="both", expand=True, padx=10, pady=10)
+        self.root.geometry("720x540")
+        self.scroll=ctk.CTkScrollableFrame(root,width=180)
+        self.scroll.pack(side="left",fill="y", padx=5, pady=10)#SIDE is for well side,basically which side the frame gets put
         self.inner_ui=ctk.CTkFrame(self.scroll)
         self.inner_ui.pack()
+        self.idk=ctk.CTkFrame(root,width=540, corner_radius=10)#GOD knows why there still is that stupid window whose corners dont curve
+        self.idk.pack(side="right",fill="both", expand=True, padx=5, pady=10)
+        self.plswork=ctk.CTkFrame(self.idk,corner_radius=10)
+        self.plswork.pack(fill="both", expand=True)#SO that it actually takes all the available place and isnt just chilling around letting other take place
         butwid=140
         butheight=100
         font=ctk.CTkFont( size=16, weight="bold")
+        ctk.CTkLabel(self.plswork,text="Welcome", font=ctk.CTkFont(size=32, weight="bold")).grid(row=0,column=0,columnspan=4,padx=10,pady=10)
         if self.session.role=="Student":
             ctk.CTkButton(self.inner_ui, text="Report Card", width=butwid, height=butheight, font=font,command= lambda:self.switcheroo(Reportcard)).grid(row=0, column=0, padx=10, pady=10)
-            ctk.CTkButton(self.inner_ui, text="Fees", width=butwid, height=butheight, font=font,command= lambda:self.switcheroo(fees)).grid(row=0, column=1, padx=10, pady=10)
-            ctk.CTkButton(self.inner_ui, text="Announcements", width=butwid, height=butheight, font=font,command= lambda:self.switcheroo(announcements)).grid(row=1, column=0, padx=10, pady=10)
-            ctk.CTkButton(self.inner_ui, text="User Details", width=butwid, height=butheight, font=font,command= lambda:self.switcheroo(userdetails)).grid(row=1, column=1, padx=10, pady=10)
-            ctk.CTkButton(self.inner_ui, text="Homework", width=butwid, height=butheight, font=font,command= lambda:self.switcheroo(homework)).grid(row=2, column=1, padx=10, pady=10)
-            ctk.CTkButton(self.inner_ui, text="Canteen", width=butwid, height=butheight, font=font,command= lambda:self.switcheroo(canteen)).grid(row=2, column=0, padx=10, pady=10)
-            ctk.CTkButton(self.inner_ui, text="Transport Details", width=butwid, height=butheight, font=font,command=lambda:self.switcheroo(transportdetails)).grid(row=3, column=0, padx=10, pady=10)
-            ctk.CTkButton(self.inner_ui, text="Newsletter", width=butwid, height=butheight, font=font,command=lambda:self.switcheroo(Newsletter)).grid(row=3, column=1, padx=10, pady=10)
+            ctk.CTkButton(self.inner_ui, text="Fees", width=butwid, height=butheight, font=font,command= lambda:self.switcheroo(fees)).grid(row=1, column=0, padx=10, pady=10)
+            ctk.CTkButton(self.inner_ui, text="Announcements", width=butwid, height=butheight, font=font,command= lambda:self.switcheroo(announcements)).grid(row=2, column=0, padx=10, pady=10)
+            ctk.CTkButton(self.inner_ui, text="User Details", width=butwid, height=butheight, font=font,command= lambda:self.switcheroo(userdetails)).grid(row=3, column=0, padx=10, pady=10)
+            ctk.CTkButton(self.inner_ui, text="Homework", width=butwid, height=butheight, font=font,command= lambda:self.switcheroo(homework)).grid(row=4, column=0, padx=10, pady=10)
+            ctk.CTkButton(self.inner_ui, text="Canteen", width=butwid, height=butheight, font=font,command= lambda:self.switcheroo(canteen)).grid(row=5, column=0, padx=10, pady=10)
+            ctk.CTkButton(self.inner_ui, text="Transport Details", width=butwid, height=butheight, font=font,command=lambda:self.switcheroo(transportdetails)).grid(row=6, column=0, padx=10, pady=10)
+            ctk.CTkButton(self.inner_ui, text="Newsletter", width=butwid, height=butheight, font=font,command=lambda:self.switcheroo(Newsletter)).grid(row=7, column=0, padx=10, pady=10)
         if self.session.role=="Teacher":
             ctk.CTkButton(self.inner_ui, text="Report Card", width=butwid, height=butheight, font=font,command= lambda:self.switcheroo(adminteach_report)).grid(row=0, column=0, padx=10, pady=10)
             ctk.CTkButton(self.inner_ui, text="Announcements", width=butwid, height=butheight, font=font,command= lambda:self.switcheroo(announcements)).grid(row=1, column=0, padx=10, pady=10)
-            ctk.CTkButton(self.inner_ui, text="User Details", width=butwid, height=butheight, font=font,command= lambda:self.switcheroo(userdetails)).grid(row=1, column=1, padx=10, pady=10)
-            ctk.CTkButton(self.inner_ui, text="Homework", width=butwid, height=butheight, font=font,command= lambda:self.switcheroo(adminteach_hw)).grid(row=2, column=1, padx=10, pady=10)
-            ctk.CTkButton(self.inner_ui, text="Canteen", width=butwid, height=butheight, font=font,command= lambda:self.switcheroo(canteen)).grid(row=2, column=0, padx=10, pady=10)
-            ctk.CTkButton(self.inner_ui, text="Transport Details", width=butwid, height=butheight, font=font,command=lambda:self.switcheroo(transportdetails)).grid(row=3, column=0, padx=10, pady=10)
-            ctk.CTkButton(self.inner_ui, text="Newsletter", width=butwid, height=butheight, font=font,command=lambda:self.switcheroo(adminteach_newsletter)).grid(row=0, column=1, padx=10, pady=10)
+            ctk.CTkButton(self.inner_ui, text="User Details", width=butwid, height=butheight, font=font,command= lambda:self.switcheroo(userdetails)).grid(row=2, column=0, padx=10, pady=10)
+            ctk.CTkButton(self.inner_ui, text="Homework", width=butwid, height=butheight, font=font,command= lambda:self.switcheroo(adminteach_hw)).grid(row=3, column=0, padx=10, pady=10)
+            ctk.CTkButton(self.inner_ui, text="Canteen", width=butwid, height=butheight, font=font,command= lambda:self.switcheroo(canteen)).grid(row=4, column=0, padx=10, pady=10)
+            ctk.CTkButton(self.inner_ui, text="Transport Details", width=butwid, height=butheight, font=font,command=lambda:self.switcheroo(transportdetails)).grid(row=5, column=0, padx=10, pady=10)
+            ctk.CTkButton(self.inner_ui, text="Newsletter", width=butwid, height=butheight, font=font,command=lambda:self.switcheroo(adminteach_newsletter)).grid(row=6, column=0, padx=10, pady=10)
         if self.session.role=="Admin":
             ctk.CTkButton(self.inner_ui, text="Report Card", width=butwid, height=butheight, font=font,command= lambda:self.switcheroo(adminteach_report)).grid(row=0, column=0, padx=10, pady=10)
-            ctk.CTkButton(self.inner_ui, text="Fees", width=butwid, height=butheight, font=font,command= lambda:self.switcheroo(admin_fees)).grid(row=0, column=1, padx=10, pady=10)
-            ctk.CTkButton(self.inner_ui, text="Announcements", width=butwid, height=butheight, font=font,command= lambda:self.switcheroo(announcements)).grid(row=1, column=0, padx=10, pady=10)
-            ctk.CTkButton(self.inner_ui, text="User Details", width=butwid, height=butheight, font=font,command= lambda:self.switcheroo(userdetails)).grid(row=1, column=1, padx=10, pady=10)
-            ctk.CTkButton(self.inner_ui, text="Homework", width=butwid, height=butheight, font=font,command= lambda:self.switcheroo(adminteach_hw)).grid(row=2, column=1, padx=10, pady=10)
-            ctk.CTkButton(self.inner_ui, text="Canteen", width=butwid, height=butheight, font=font,command= lambda:self.switcheroo(admin_canteen)).grid(row=2, column=0, padx=10, pady=10)
-            ctk.CTkButton(self.inner_ui, text="Transport Details", width=butwid, height=butheight, font=font,command=lambda:self.switcheroo(admin_transport)).grid(row=3, column=0, padx=10, pady=10)
-            ctk.CTkButton(self.inner_ui, text="Newsletter", width=butwid, height=butheight, font=font,command=lambda:self.switcheroo(adminteach_newsletter)).grid(row=3, column=1, padx=10, pady=10)
+            ctk.CTkButton(self.inner_ui, text="Fees", width=butwid, height=butheight, font=font,command= lambda:self.switcheroo(admin_fees)).grid(row=1, column=0, padx=10, pady=10)
+            ctk.CTkButton(self.inner_ui, text="Announcements", width=butwid, height=butheight, font=font,command= lambda:self.switcheroo(announcements)).grid(row=2, column=0, padx=10, pady=10)
+            ctk.CTkButton(self.inner_ui, text="User Details", width=butwid, height=butheight, font=font,command= lambda:self.switcheroo(userdetails)).grid(row=3, column=0, padx=10, pady=10)
+            ctk.CTkButton(self.inner_ui, text="Homework", width=butwid, height=butheight, font=font,command= lambda:self.switcheroo(adminteach_hw)).grid(row=4, column=0, padx=10, pady=10)
+            ctk.CTkButton(self.inner_ui, text="Canteen", width=butwid, height=butheight, font=font,command= lambda:self.switcheroo(admin_canteen)).grid(row=5, column=0, padx=10, pady=10)
+            ctk.CTkButton(self.inner_ui, text="Transport Details", width=butwid, height=butheight, font=font,command=lambda:self.switcheroo(admin_transport)).grid(row=6, column=0, padx=10, pady=10)
+            ctk.CTkButton(self.inner_ui, text="Newsletter", width=butwid, height=butheight, font=font,command=lambda:self.switcheroo(adminteach_newsletter)).grid(row=7, column=0, padx=10, pady=10)
     def switcheroo(self, xyz): #xyz is holding parameter for the class we will be switching to can be anything provided that thingb is undefined atm.
         for widget in self.root.winfo_children():
             widget.destroy()
