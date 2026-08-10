@@ -268,6 +268,16 @@ class database:
             ORDER BY h.posted_date DESC
         """, (grade,))
         return self.cur.fetchall()
+    def get_mainhw(self, grade):
+        self.cur.execute("""
+            select h.title, s.subject_name, h.content, h.posted_date
+            from homework h
+            join subjects s ON h.subject_id = s.subject_id
+            WHERE h.grade = %s
+            ORDER BY h.posted_date DESC
+            Limit 3
+        """, (grade,))
+        return self.cur.fetchall()
     def post_hw(self, subject_id, title, content, grade):
         self.cur.execute("""
             Insert into homework (subject_id, title, content, grade)
@@ -364,13 +374,22 @@ class mainmenu:
         font=ctk.CTkFont( size=16, weight="bold")
         ctk.CTkLabel(self.plswork,text="Welcome, User", font=ctk.CTkFont(family="Segoe UI",size=30,weight="bold"),text_color="#1F2937").grid(row=0,column=0,columnspan=3,padx=10,pady=10)
         grade=self.session.grade #needed for passing the argument
-        well=self.db.get_announcementsformain(grade)#calls the announcement function from database class, grade is the argument required  
-        print(well)      
+        well=self.db.get_announcementsformain(grade)#calls the announcement function from database class, grade is the argument required     
         ctk.CTkLabel(self.plswork,text="Latest Announcements", font=ctk.CTkFont(family="Segoe UI",size=24)).grid(row=1,column=0,columnspan=3,padx=10,pady=10)
         for k, i in enumerate(well):#need the row placement to happen at the same time or else we end up with the same mannouncement thus this loop
             ctk.CTkButton(self.plswork, text=str(i[0]),text_color="#1F2937",fg_color="#FFFFFF",border_width=1,border_color="black",hover_color="#FFFFFF",width=75,corner_radius=0).grid(row=k+2, column=0, sticky="ew",padx=(15, 0))#k+2 so that we can accomodate latest announcement
             ctk.CTkButton(self.plswork, text=str(i[1]),text_color="#1F2937",fg_color="#FFFFFF",border_width=1,border_color="black",hover_color="#FFFFFF",width=450,corner_radius=0).grid(row=k+2, column=1, sticky="ew")#Ok guys so i got a genius idea we make them all buttons and fix their height and with, set hover colour to main color so theres no change and we get everything we wanted
             ctk.CTkButton(self.plswork, text=str(i[2]),text_color="#1F2937",fg_color="#FFFFFF",border_width=1,border_color="black",hover_color="#FFFFFF",width=75,corner_radius=0).grid(row=k+2, column=2, sticky="ew")#sticky ew for it to occupy all the allotted space, corner radius so that the thing looks like a table and turns out we can specify padx to work locally hence padx=(15,0)
+        gmhw=self.db.get_mainhw(grade)
+        ctk.CTkLabel(self.plswork, text="").grid(row=6)
+        ctk.CTkLabel(self.plswork,text="Latest Homework", font=ctk.CTkFont(family="Segoe UI",size=24)).grid(row=7,column=0,columnspan=3,padx=10,pady=10)
+        ctk.CTkLabel(self.plswork, text="Subject",font=("Roboto", 18)).grid(row=8,column=0)
+        ctk.CTkLabel(self.plswork, text="Topic",font=("Roboto", 18)).grid(row=8,column=1)
+        ctk.CTkLabel(self.plswork, text="Date",font=("Roboto", 18)).grid(row=8,column=2)
+        for k, i in enumerate(gmhw):#need the row placement to happen at the same time or else we end up with the same mannouncement thus this loop
+            ctk.CTkButton(self.plswork, text=str(i[1]),text_color="#1F2937",fg_color="#FFFFFF",border_width=1,border_color="black",hover_color="#FFFFFF",width=75,corner_radius=0).grid(row=k+10, column=0, sticky="ew",padx=(15, 0))
+            ctk.CTkButton(self.plswork, text=str(i[0]),text_color="#1F2937",fg_color="#FFFFFF",border_width=1,border_color="black",hover_color="#FFFFFF",width=450,corner_radius=0).grid(row=k+10, column=1, sticky="ew")
+            ctk.CTkButton(self.plswork, text=str(i[3]),text_color="#1F2937",fg_color="#FFFFFF",border_width=1,border_color="black",hover_color="#FFFFFF",width=75,corner_radius=0).grid(row=k+10, column=2, sticky="ew")
         if self.session.role=="Student":
             ctk.CTkButton(self.inner_ui, text="Report Card", width=butwid, height=butheight, font=font,command= lambda:self.switcheroo(Reportcard)).grid(row=0, column=0, padx=10, pady=10)
             ctk.CTkButton(self.inner_ui, text="Fees", width=butwid, height=butheight, font=font,command= lambda:self.switcheroo(fees)).grid(row=1, column=0, padx=10, pady=10)
