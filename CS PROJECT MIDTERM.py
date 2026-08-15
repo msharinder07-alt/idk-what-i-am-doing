@@ -67,11 +67,12 @@ class database:
         self.cur.execute("select * from student_details WHERE user_id = %s",(user_id,))
         return self.cur.fetchone()
     def get_announcements(self,grade):
-        self.cur.execute("select * from announcements WHERE target_grade LIKE %s OR target_grade = 'all'order by announcement_id desc",(f'%{grade}%',))
+        self.cur.execute("SELECT * FROM announcements WHERE FIND_IN_SET(%s, target_grade) OR target_grade = 'all' ORDER BY post_on DESC",(str(grade),))
         announce_result= self.cur.fetchall()
         return announce_result
     def get_announcementsformain(self,grade):
-        self.cur.execute("select * from announcements WHERE target_grade LIKE %s OR target_grade = 'all'order by announcement_id desc limit 3",(f'%{grade}%',))
+        print(grade)
+        self.cur.execute("SELECT * FROM announcements WHERE FIND_IN_SET(%s, target_grade) OR target_grade = 'all' ORDER BY post_on DESC limit 3",(str(grade),))
         announce_result= self.cur.fetchall()
         return announce_result
     def new_announcements(self,titl,cont,ta_gra):
@@ -709,6 +710,12 @@ class transportdetails:
             ctk.CTkLabel(self.inner_ui, text=tpd[1],font=("Roboto", 18,"bold")).grid(row=7,column=1,padx=5,pady=5)
             ctk.CTkLabel(self.inner_ui, text=tpd[2],font=("Roboto", 18,"bold")).grid(row=8,column=1,padx=5,pady=5)
             ctk.CTkLabel(self.inner_ui, text=tpd[3],font=("Roboto", 18,"bold")).grid(row=9,column=1,padx=5,pady=5)
+            map_widget =TkinterMapView(self.inner_ui, width=300, height=300, corner_radius=10)
+            map_widget.grid(row=10,column=0,sticky="nsew",columnspan=2)
+            map_widget.set_position(12.847197675032593, 77.6302763426442)
+            marker_1=map_widget.set_marker(12.847197675032593, 77.6302763426442, text="DPS")
+            marker_2=map_widget.set_marker(12.82991380156151, 77.6652057838779, text="House")
+            map_widget.set_zoom(10)
         if tpd[0]=="Private":
             ctk.CTkLabel(self.inner_ui,text="Mode :",font=("Roboto", 18,"bold")).grid(row=6,column=0,padx=5,pady=5)
             ctk.CTkLabel(self.inner_ui, text="Guardian :",font=("Roboto", 18,"bold")).grid(row=7,column=0,padx=5,pady=5)
