@@ -367,7 +367,7 @@ class mainmenu:
         self.db=db
         self.session=session
         self.root.title("SMS")
-        self.root.geometry("900x600")
+        self.root.geometry("1024x600")
         self.scroll=ctk.CTkScrollableFrame(root,width=180, fg_color="#E8EFEC")
         self.scroll.pack(side="left",fill="y", padx=5, pady=10)#SIDE is for well side,basically which side the frame gets put
         self.inner_ui=ctk.CTkFrame(self.scroll)
@@ -404,7 +404,6 @@ class mainmenu:
             ctk.CTkButton(self.inner_ui, text="Canteen", width=butwid, height=butheight, font=font,command= lambda:self.switcheroo(canteen)).grid(row=5, column=0, padx=10, pady=10)
             ctk.CTkButton(self.inner_ui, text="Transport Details", width=butwid, height=butheight, font=font,command=lambda:self.switcheroo(transportdetails)).grid(row=6, column=0, padx=10, pady=10)
             ctk.CTkButton(self.inner_ui, text="Newsletter", width=butwid, height=butheight, font=font,command=lambda:self.switcheroo(Newsletter)).grid(row=7, column=0, padx=10, pady=10)
-    
     def switcheroo(self, xyz): #xyz is holding parameter for the class we will be switching to can be anything provided that thingb is undefined atm.
         for widget in self.root.winfo_children():
             widget.destroy()
@@ -420,7 +419,7 @@ class fees:
         self.scroll.pack(fill="both", expand=True, padx=10, pady=10)
         self.inner_ui=ctk.CTkFrame(self.scroll)
         self.inner_ui.pack()
-        ctk.CTkButton(self.inner_ui, text="back", command=self.back_bt).grid(row=0,column=0,columnspan=2)
+        ctk.CTkButton(self.inner_ui, text="Back", command=self.back_bt).grid(row=0,column=0,columnspan=2)
         q=self.db.get_student_details(self.session.user_id)
         ctk.CTkLabel(self.inner_ui,text=q[0],font=("Roboto", 18)).grid(row=1,column=1,pady=5,padx=5)
         ctk.CTkLabel(self.inner_ui,text=q[1],font=("Roboto", 18)).grid(row=2,column=1,pady=5,padx=5)
@@ -466,7 +465,7 @@ class userdetails:
         self.scroll.pack(fill="both", expand=True, padx=10, pady=10)
         self.inner_ui=ctk.CTkFrame(self.scroll)
         self.inner_ui.pack()
-        bck_but=ctk.CTkButton(self.inner_ui,text="back",command=self.back_bt).grid(column=0,row=7,columnspan=2)
+        bck_but=ctk.CTkButton(self.inner_ui,text="Back",command=self.back_bt).grid(column=0,row=7,columnspan=2)
         if self.session.role == "Student":
             q=self.db.get_student_details(self.session.user_id)
             imgp=Image.open("Capture1.png")
@@ -500,10 +499,11 @@ class Reportcard:
         self.scroll.pack(fill="both", expand=True, padx=10, pady=10)
         self.inner_ui=ctk.CTkFrame(self.scroll)
         self.inner_ui.pack()
-        bck_btn=ctk.CTkButton(self.inner_ui,text="back",command=self.bck_btn).grid(row=0,column=2,columnspan=2)
         if self.session.role == "Student":
             q=self.db.get_student_details(self.session.user_id)
             pa=self.db.report_card_details(self.session.user_id)
+            l=len(subjects)
+            bck_btn=ctk.CTkButton(self.inner_ui,text="Back",command=self.bck_btn).grid(row=0,column=0,columnspan=l)
             ctk.CTkLabel(self.inner_ui,text=q[0],font=("Roboto", 18)).grid(row=1,column=3,pady=5,padx=5)
             ctk.CTkLabel(self.inner_ui,text=q[1],font=("Roboto", 18)).grid(row=2,column=3,pady=5,padx=5)
             ctk.CTkLabel(self.inner_ui,text=q[2],font=("Roboto", 18)).grid(row=3,column=3,pady=5,padx=5)
@@ -516,7 +516,7 @@ class Reportcard:
             ctk.CTkLabel(self.inner_ui,text="Section :",font=("Roboto", 18,"bold")).grid(row=5,column=2,padx=5,pady=5)
             # header row
             for col, subject in enumerate(subjects):
-                ctk.CTkLabel(self.inner_ui, text=subject).grid(row=6, column=col+1)
+                ctk.CTkLabel(self.inner_ui, text=subject).grid(row=6, column=col+1,padx=3)
             # Term1 row
             ctk.CTkLabel(self.inner_ui, text="Term1").grid(row=7, column=0)
             for col, subject in enumerate(subjects):
@@ -526,7 +526,7 @@ class Reportcard:
             for col, subject in enumerate(subjects):
                 ctk.CTkLabel(self.inner_ui, text=str(data['Term2'][subject])).grid(row=8, column=col+1)
             ctk.CTkButton(self.inner_ui, text="View Graph",
-            command=lambda: self.show_graph(data, subjects)).grid(row=9,column=2,columnspan=2,pady=10)
+            command=lambda: self.show_graph(data, subjects)).grid(row=9,column=0,columnspan=l,pady=10)
     def show_graph(self, data, subjects):
         import numpy as np
         term1_marks = [data['Term1'][sub] for sub in subjects]
@@ -570,15 +570,16 @@ class announcements:
         self.scroll.pack(fill="both", expand=True, padx=10, pady=10)
         self.inner_ui=ctk.CTkFrame(self.scroll)
         self.inner_ui.pack()
-        bck_but=ctk.CTkButton(self.inner_ui,text="back",command=self.back_bt).grid(column=0,row=0,columnspan=4)
+        bck_but=ctk.CTkButton(self.inner_ui,text="Back",command=self.back_bt).grid(column=0,row=0,columnspan=4)
         if self.session.role=="Student":
             grade=self.session.grade #needed for passing the argument
-            wow=self.db.get_announcements(grade)#calls the announcement function from database class, grade is the argument required        
+            wow=self.db.get_announcements(grade)#calls the announcement function from database class, grade is the argument required    
+            ctk.CTkLabel(self.inner_ui,text="Announcements", font=ctk.CTkFont(family="Segoe UI",size=24)).grid(row=1,column=0,columnspan=4,padx=10,pady=10)
             for k, i in enumerate(wow):#need the row placement to happen at the same time or else we end up with the same mannouncement thus this loop
-                ctk.CTkLabel(self.inner_ui, text=str(i[0])).grid(row=k+1, column=1,padx=10,pady=5)
-                ctk.CTkLabel(self.inner_ui, text=str(i[1])).grid(row=k+1, column=2,padx=10,pady=5)
-                ctk.CTkLabel(self.inner_ui, text=str(i[2])).grid(row=k+1, column=3,padx=10,pady=5)
-                ctk.CTkLabel(self.inner_ui, text=str(i[3])).grid(row=k+1, column=4,padx=10,pady=5)
+                ctk.CTkButton(self.inner_ui, text=str(i[0]),text_color="#1F2937",fg_color="#FFFFFF",border_width=1,border_color="black",hover_color="#FFFFFF",width=75,corner_radius=0).grid(row=k+2, column=0, sticky="ew",padx=(15, 0))#k+2 so that we can accomodate latest announcement
+                ctk.CTkButton(self.inner_ui, text=str(i[1]),text_color="#1F2937",fg_color="#FFFFFF",border_width=1,border_color="black",hover_color="#FFFFFF",width=450,corner_radius=0).grid(row=k+2, column=1, sticky="ew")#Ok guys so i got a genius idea we make them all buttons and fix their height and with, set hover colour to main color so theres no change and we get everything we wanted
+                ctk.CTkButton(self.inner_ui, text=str(i[2]),text_color="#1F2937",fg_color="#FFFFFF",border_width=1,border_color="black",hover_color="#FFFFFF",width=75,corner_radius=0).grid(row=k+2, column=2, sticky="ew")
+                ctk.CTkButton(self.inner_ui, text=str(i[3]),text_color="#1F2937",fg_color="#FFFFFF",border_width=1,border_color="black",hover_color="#FFFFFF",width=75,corner_radius=0).grid(row=k+2, column=3,sticky="ew")
     def new_annoncements(self):
         titl = self.ti.get()
         cont = self.co.get()
@@ -597,23 +598,24 @@ class homework:
         self.session=session
         self.db=db
         self.root.title("SMS")
-        self.root.geometry("720x600")
+        self.root.geometry("900x600")
         self.scroll=ctk.CTkScrollableFrame(root)
         self.scroll.pack(fill="both", expand=True, padx=10, pady=10)
         self.inner_ui=ctk.CTkFrame(self.scroll)
         self.inner_ui.pack()
-        bck_but=ctk.CTkButton(self.inner_ui,text="back",command=self.back_bt).grid(column=0,row=0,columnspan=4)
+        bck_but=ctk.CTkButton(self.inner_ui,text="Back",command=self.back_bt).grid(column=0,row=0,columnspan=4)
         grade = self.session.grade
         ghw=self.db.get_hw(grade)
-        ctk.CTkLabel(self.inner_ui, text="Subject",font=("Roboto", 18)).grid(row=1,column=0)
-        ctk.CTkLabel(self.inner_ui, text="Topic",font=("Roboto", 18)).grid(row=1,column=1)
-        ctk.CTkLabel(self.inner_ui, text="Content",font=("Roboto", 18)).grid(row=1,column=2)
-        ctk.CTkLabel(self.inner_ui, text="Date",font=("Roboto", 18)).grid(row=1,column=3)
+        ctk.CTkLabel(self.inner_ui,text="Homework", font=ctk.CTkFont(family="Segoe UI",size=24)).grid(row=1,column=0,columnspan=4,padx=10,pady=10)
+        ctk.CTkButton(self.inner_ui, text="Subject",font=("Roboto", 18),text_color="#1F2937",fg_color="#FFFFFF",border_width=1,border_color="black",hover_color="#FFFFFF",corner_radius=0).grid(row=2,column=0,sticky="ew")
+        ctk.CTkButton(self.inner_ui, text="Topic",font=("Roboto", 18),text_color="#1F2937",fg_color="#FFFFFF",border_width=1,border_color="black",hover_color="#FFFFFF",corner_radius=0).grid(row=2,column=1,sticky="ew")
+        ctk.CTkButton(self.inner_ui, text="Content",font=("Roboto", 18),text_color="#1F2937",fg_color="#FFFFFF",border_width=1,border_color="black",hover_color="#FFFFFF",corner_radius=0).grid(row=2,column=2,sticky="ew")
+        ctk.CTkButton(self.inner_ui, text="Date",font=("Roboto", 18),text_color="#1F2937",fg_color="#FFFFFF",border_width=1,border_color="black",hover_color="#FFFFFF",corner_radius=0).grid(row=2,column=3,sticky="ew")
         for k, i in enumerate(ghw):#need the row placement to happen at the same time or else we end up with the same mannouncement thus this loop
-            ctk.CTkLabel(self.inner_ui, text=str(i[1])).grid(row=k+2, column=0, padx=5)#k+2 cause had to put back button and the titles above too so k+2
-            ctk.CTkLabel(self.inner_ui, text=str(i[0])).grid(row=k+2, column=1, padx=5)
-            ctk.CTkLabel(self.inner_ui, text=str(i[2])).grid(row=k+2, column=2, padx=5)
-            ctk.CTkLabel(self.inner_ui, text=str(i[3])).grid(row=k+2, column=3, padx=5)
+            ctk.CTkButton(self.inner_ui, text=str(i[1]),text_color="#1F2937",fg_color="#FFFFFF",border_width=1,border_color="black",hover_color="#FFFFFF",width=75,corner_radius=0).grid(row=k+3, column=0,sticky="ew")#k+3 cause had to put back button and the titles above too so k+2
+            ctk.CTkButton(self.inner_ui, text=str(i[0]),text_color="#1F2937",fg_color="#FFFFFF",border_width=1,border_color="black",hover_color="#FFFFFF",width=75,corner_radius=0).grid(row=k+3, column=1,sticky="ew")
+            ctk.CTkButton(self.inner_ui, text=str(i[2]),text_color="#1F2937",fg_color="#FFFFFF",border_width=1,border_color="black",hover_color="#FFFFFF",width=75,corner_radius=0).grid(row=k+3, column=2,sticky="ew")
+            ctk.CTkButton(self.inner_ui, text=str(i[3]),text_color="#1F2937",fg_color="#FFFFFF",border_width=1,border_color="black",hover_color="#FFFFFF",width=75,corner_radius=0).grid(row=k+3, column=3,sticky="ew")
     def back_bt(self):
          for widget in self.root.winfo_children():
             widget.destroy()
@@ -648,7 +650,7 @@ class canteen:
                 ctk.CTkLabel(self.inner_ui, text=meal).grid(row=row+1, column=0, padx=10, pady=5)
                 ctk.CTkLabel(self.inner_ui, text=item).grid(row=row+1, column=1, padx=10, pady=5)
                 ctk.CTkLabel(self.inner_ui, text=f"₹{float(price):.0f}").grid(row=row+1, column=2, padx=10, pady=5)    
-            bck_but=ctk.CTkButton(self.inner_ui,text="back",command=self.back_bt).grid(column=0,row=4,columnspan=3)
+            bck_but=ctk.CTkButton(self.inner_ui,text="Back",command=self.back_bt).grid(column=0,row=4,columnspan=3)
     def back_bt(self):
          for widget in self.root.winfo_children():
             widget.destroy()
@@ -664,7 +666,7 @@ class Newsletter:
         self.scroll.pack(fill="both", expand=True, padx=10, pady=10)
         self.inner_ui=ctk.CTkFrame(self.scroll)
         self.inner_ui.pack()
-        bck_but=ctk.CTkButton(self.inner_ui,text="back",command=self.back_bt).grid(column=0,row=7,columnspan=2)
+        bck_but=ctk.CTkButton(self.inner_ui,text="Back",command=self.back_bt).grid(column=0,row=19,columnspan=2)
         newsletter=self.db.get_newsletters()
         for row, n in enumerate(newsletter):
             ctk.CTkButton(
@@ -687,7 +689,7 @@ class transportdetails:
         self.scroll.pack(fill="both", expand=True, padx=10, pady=10)
         self.inner_ui=ctk.CTkFrame(self.scroll)
         self.inner_ui.pack()
-        bck_but=ctk.CTkButton(self.inner_ui,text="back",command=self.back_bt).grid(column=0,row=0,columnspan=2)
+        bck_but=ctk.CTkButton(self.inner_ui,text="Back",command=self.back_bt).grid(column=0,row=0,columnspan=2)
         q=self.db.get_student_details(self.session.user_id)
         tpd=self.db.transport_details(self.session.user_id)
         ctk.CTkLabel(self.inner_ui,text=q[0],font=("Roboto", 18)).grid(row=1,column=1,pady=5,padx=5)
