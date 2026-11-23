@@ -392,7 +392,7 @@ class mainmenu:
         self.root=root
         self.db=db
         self.session=session
-        self.root.title("SMS")
+        self.root.title("Aethel")
         self.root.geometry("1920x1080")
         self.scroll=ctk.CTkScrollableFrame(root,width=180, fg_color="#E8EFEC")
         self.scroll.pack(side="left",fill="y", padx=5, pady=10)#SIDE is for well side,basically which side the frame gets put
@@ -506,7 +506,7 @@ class userdetails:
         self.root=root
         self.session=session
         self.db=db
-        self.root.title("SMS")
+        self.root.title("Aethel")
         self.root.geometry("1920x1080")
         self.scroll=ctk.CTkScrollableFrame(root)
         self.scroll.pack(fill="both", expand=True, padx=10, pady=10)
@@ -557,7 +557,7 @@ class Reportcard:
         self.root=root
         self.session=session
         self.db=db
-        self.root.title("SMS")
+        self.root.title("Aethel")
         self.root.geometry("1920x1080")
         self.scroll=ctk.CTkScrollableFrame(root)
         self.scroll.pack(fill="both", expand=True, padx=10, pady=10)
@@ -627,7 +627,7 @@ class announcements:
         self.root=root
         self.session=session
         self.db=db
-        self.root.title("SMS")
+        self.root.title("Aethel")
         self.root.geometry("1920x1080")
         self.scroll=ctk.CTkScrollableFrame(root)
         self.scroll.pack(fill="both", expand=True, padx=10, pady=10)
@@ -681,7 +681,7 @@ class homework:
         self.root=root
         self.session=session
         self.db=db
-        self.root.title("SMS")
+        self.root.title("Aethel")
         self.root.geometry("1920x1080")
         self.scroll=ctk.CTkScrollableFrame(root)
         self.scroll.pack(fill="both", expand=True, padx=10, pady=10)
@@ -709,7 +709,7 @@ class canteen:
         self.root=root
         self.session=session
         self.db=db
-        self.root.title("SMS")
+        self.root.title("Aethel")
         self.root.geometry("1920x1080")
         self.scroll=ctk.CTkScrollableFrame(root)
         self.scroll.pack(fill="both", expand=True, padx=10, pady=10)
@@ -748,7 +748,7 @@ class Newsletter:
         self.root=root
         self.session=session
         self.db=db
-        self.root.title("SMS")
+        self.root.title("Aethel")
         self.root.geometry("1920x1080")
         self.scroll=ctk.CTkScrollableFrame(root)
         self.scroll.pack(fill="both", expand=True, padx=10, pady=10)
@@ -771,7 +771,7 @@ class transportdetails:
         self.root=root
         self.session=session
         self.db=db
-        self.root.title("SMS")
+        self.root.title("Aethel")
         self.root.geometry("1920x1080")
         self.scroll=ctk.CTkScrollableFrame(root)
         self.scroll.pack(fill="both", expand=True, padx=10, pady=10)
@@ -817,7 +817,7 @@ class adminteach_report:
         self.root = root
         self.session = session
         self.db = db
-        self.root.title("SMS")
+        self.root.title("Aethel")
         self.root.geometry("1920x1080")
         self.scroll = ctk.CTkScrollableFrame(root)
         self.scroll.pack(fill="both", expand=True, padx=10, pady=10)
@@ -939,7 +939,7 @@ class admin_transport:
         self.root=root
         self.session=session
         self.db=db
-        self.root.title("SMS")
+        self.root.title("Aethel")
         self.root.geometry("1920x1080")
         self.scroll=ctk.CTkScrollableFrame(root)
         self.scroll.pack(fill="both", expand=True, padx=10, pady=10)
@@ -1027,7 +1027,7 @@ class admin_fees:
         self.root=root
         self.session=session
         self.db=db
-        self.root.title("SMS")
+        self.root.title("Aethel")
         self.root.geometry("1920x1080")
         self.scroll=ctk.CTkScrollableFrame(root)
         self.scroll.pack(fill="both", expand=True, padx=10, pady=10)
@@ -1112,7 +1112,7 @@ class adminteach_hw:
         self.root=root
         self.session=session
         self.db=db
-        self.root.title("SMS")
+        self.root.title("Aethel")
         self.root.geometry("1920x1080")
         self.scroll=ctk.CTkScrollableFrame(root)
         self.scroll.pack(fill="both", expand=True, padx=10, pady=10)
@@ -1207,7 +1207,7 @@ class adminteach_newsletter:
         self.root=root
         self.session=session
         self.db=db
-        self.root.title("SMS")
+        self.root.title("Aethel")
         self.root.geometry("1920x1080")
         self.scroll=ctk.CTkScrollableFrame(root)
         self.scroll.pack(fill="both", expand=True, padx=10, pady=10)
@@ -1237,7 +1237,7 @@ class admin_canteen:
         self.root=root
         self.session=session
         self.db=db
-        self.root.title("SMS")
+        self.root.title("Aethel")
         self.root.geometry("1920x1080")
         self.scroll=ctk.CTkScrollableFrame(root)
         self.scroll.pack(fill="both", expand=True, padx=10, pady=10)
