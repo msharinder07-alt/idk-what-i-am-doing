@@ -15,7 +15,7 @@ class database:
         self.con = pymysql.connect(
             host='localhost',
             user='root',
-            passwd='Root@123',
+            password='Root@123',
             database='school_management_app',
         )
         self.cur=self.con.cursor()
@@ -110,7 +110,7 @@ class database:
         )
         return self.cur.fetchall()
     def get_grades(self): # the functions below are made to assist with dropdowns
-        self.cur.execute("SELECT DISTINCT grade FROM student_details ORDER BY FIELD(grade,'I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII')")
+        self.cur.execute("SELECT DISTINCT grade FROM student_details ORDER BY FIELD(grade,1,2,3,4,5,6,7,8)")
         return [row[0] for row in self.cur.fetchall()]
     def get_sections_by_grade(self, grade):
         self.cur.execute("select DISTINCT section from student_details WHERE grade = %s ORDER BY section",(grade,))
@@ -407,6 +407,8 @@ class mainmenu:
         ctk.CTkLabel(self.plswork,text="Welcome, User", font=ctk.CTkFont(family="Segoe UI",size=42,weight="bold"),text_color="#1F2937").grid(row=0,column=0,columnspan=3,padx=10,pady=10)
         if self.session.role=="Student":
             grade=self.session.grade #needed for passing the argument
+        elif self.session.role == "Admin":
+            grade=self.db.get_grades()[0]
         else :
             grade=self.session.grades[0]
         well=self.db.get_announcementsformain(grade)#calls the announcement function from database class, grade is the argument required     
@@ -440,7 +442,6 @@ class mainmenu:
             ctk.CTkButton(self.inner_ui, text="User Details", width=butwid, height=butheight, font=font,command= lambda:self.switcheroo(userdetails)).grid(row=2, column=0, padx=10, pady=10)
             ctk.CTkButton(self.inner_ui, text="Homework", width=butwid, height=butheight, font=font,command= lambda:self.switcheroo(adminteach_hw)).grid(row=3, column=0, padx=10, pady=10)
             ctk.CTkButton(self.inner_ui, text="Canteen", width=butwid, height=butheight, font=font,command= lambda:self.switcheroo(canteen)).grid(row=4, column=0, padx=10, pady=10)
-            
             ctk.CTkButton(self.inner_ui, text="Newsletter", width=butwid, height=butheight, font=font,command=lambda:self.switcheroo(adminteach_newsletter)).grid(row=6, column=0, padx=10, pady=10)
         if self.session.role=="Admin":
             ctk.CTkButton(self.inner_ui, text="Report Card", width=butwid, height=butheight, font=font,command= lambda:self.switcheroo(adminteach_report)).grid(row=0, column=0, padx=10, pady=10)
@@ -825,7 +826,7 @@ class adminteach_report:
         ctk.CTkButton(self.inner_ui,text="Back",command=self.back_bt).grid(column=0, row=0, columnspan=3)
         # Original grade selection logic
         if self.session.role == "Admin":
-            grades = self.db.get_grades()
+            grades = [str(grade) for grade in self.db.get_grades()]
         else:
             grades = self.session.grades
         if not grades:
@@ -945,7 +946,7 @@ class admin_transport:
         self.inner_ui=ctk.CTkFrame(self.scroll)
         self.inner_ui.pack()
         bck_but=ctk.CTkButton(self.inner_ui,text="Back",command=self.back_bt).grid(column=0,row=0,columnspan=3)
-        grades = self.db.get_grades()
+        grades = [str(grade) for grade in self.db.get_grades()]
         self.grade_var = ctk.StringVar(value=grades[0])
         ctk.CTkOptionMenu(self.inner_ui,values=grades,variable=self.grade_var,command=self.on_grade_select).grid(row=1, column=0, padx=10, pady=10)
         self.section_var = ctk.StringVar(value="Select Section")
@@ -1033,7 +1034,7 @@ class admin_fees:
         self.inner_ui=ctk.CTkFrame(self.scroll)
         self.inner_ui.pack()
         bck_but=ctk.CTkButton(self.inner_ui,text="Back",command=self.back_bt).grid(column=0,row=0,columnspan=3)
-        grades = self.db.get_grades()
+        grades = [str(grade) for grade in self.db.get_grades()]
         self.grade_var = ctk.StringVar(value=grades[0])
         ctk.CTkOptionMenu(self.inner_ui,values=grades,variable=self.grade_var,command=self.on_grade_select).grid(row=1, column=0, padx=10, pady=10)
         self.section_var = ctk.StringVar(value="Select Section")
